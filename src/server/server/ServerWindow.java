@@ -1,5 +1,6 @@
 package server.server;
 
+import server.client.Client;
 import server.client.ClientGUI;
 
 import javax.swing.*;
@@ -15,15 +16,15 @@ public class ServerWindow extends JFrame {
     private static final int WIDTH = 400;
     private static final int HEIGHT = 300;
     private static final String LOG_PATH = "src/server/server/log.txt";
-
-    private List<ClientGUI> clientGUIList;
-
+    private List<Client> clientList;
+    private IServer server;
     private JButton btnStart, btnStop;
     private JTextArea log;
     private boolean work;
 
     public ServerWindow(){
-        clientGUIList = new ArrayList<>();
+        this.server = new Server(this);
+        clientList = server.getClientList();
 
         setDefaultCloseOperation(EXIT_ON_CLOSE);
         setSize(WIDTH, HEIGHT);
@@ -36,23 +37,12 @@ public class ServerWindow extends JFrame {
         setVisible(true);
     }
 
-    public boolean connectUser(ClientGUI clientGUI){
-        if (!work){
-            return false;
-        }
-        clientGUIList.add(clientGUI);
-        return true;
+    public boolean isWork() {
+        return work;
     }
 
     public String getLog() {
         return readLog();
-    }
-
-    public void disconnectUser(ClientGUI clientGUI){
-        clientGUIList.remove(clientGUI);
-        if (clientGUI != null){
-            clientGUI.disconnectFromServer();
-        }
     }
 
     public void message(String text){
@@ -65,8 +55,8 @@ public class ServerWindow extends JFrame {
     }
 
     private void answerAll(String text){
-        for (ClientGUI clientGUI: clientGUIList){
-            clientGUI.answer(text);
+        for (Client client: clientList){
+            client.answerFromServer(text);
         }
     }
 
@@ -128,8 +118,8 @@ public class ServerWindow extends JFrame {
                     appendLog("Сервер уже был остановлен");
                 } else {
                     work = false;
-                    while (!clientGUIList.isEmpty()){
-                        disconnectUser(clientGUIList.get(clientGUIList.size()-1));
+                    while (!clientList.isEmpty()){
+                        server.disconnectUser(clientList.get(clientList.size()-1));
                     }
                     appendLog("Сервер остановлен!");
                 }
@@ -139,5 +129,9 @@ public class ServerWindow extends JFrame {
         panel.add(btnStart);
         panel.add(btnStop);
         return panel;
+    }
+
+    public IServer getConnection() {
+        return server;
     }
 }

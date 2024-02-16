@@ -1,14 +1,15 @@
 package server.client;
 
+import server.server.IServer;
 import server.server.Server;
 
 public class Client {
     private View view;
     private String name;
-    private Server server;
+    private IServer server;
     private boolean connected;
 
-    public Client(View view, Server server) {
+    public Client(View view, IServer server) {
         this.view = view;
         this.server = server;
     }
@@ -45,7 +46,7 @@ public class Client {
     public void sendMessage(String message){
         if (connected) {
             if (!message.isEmpty()) {
-                server.sendMessage(name + ": " + message);
+                server.getServerWindow().message(name + ": " + message);
             }
         } else {
             showOnWindow("Нет подключения к серверу");
@@ -56,3 +57,5 @@ public class Client {
         view.sendMessage(text + "\n");
     }
 }
+
+
